@@ -33,9 +33,11 @@ function App() {
                 element={<ConceptOverviewPage />}
             />
             <Route
-                path="/concept/:conceptID/practice"
+                path="/practice/:sessionID"
                 element={<PracticePage />}
             />
+            {/* TODO: Implement a session-not-found page for invalid or missing session IDs. */}
+            {/* TODO: Implement a session-ended page for expired, user-ended, and completed sessions. */}
 
       </Routes>
   )
