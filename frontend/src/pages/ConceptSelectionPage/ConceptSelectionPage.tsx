@@ -1,30 +1,29 @@
 import {useState} from "react";
+import {useNavigate} from "react-router";
 import './ConceptSelectionPage.css'
 
-type Concept = {
-    cid: string
-    name: string
-    description: string
-}
+import type {Concept} from "../../types.ts";
 
 function ConceptSelectionPage () {
     const [concepts, setConcepts] = useState<Concept[]>(
         [
             {
-                cid: '1',
+                id: '1',
                 name: 'Algebra',
                 description: 'Learn equations and variables',
             },
             {
-                cid: '2',
+                id: '2',
                 name: 'Geometry',
                 description: 'Learn shapes and measurements',
             },
         ]
     )
 
+    const navigate = useNavigate();
+
     function handleSelectConcept(cid: string) {
-        console.log(`Selected Concept: ${cid}`)
+        navigate(`/concept/${cid}`)
     }
 
     return (
@@ -37,9 +36,9 @@ function ConceptSelectionPage () {
                     {concepts.map((concept) => (
                         <button
                             type="button"
-                            key={concept.cid}
+                            key={concept.id}
                             className="concept-card"
-                            onClick={() => {handleSelectConcept(concept.cid)}}
+                            onClick={() => {handleSelectConcept(concept.id)}}
                         >
                             <span className="concept-card-name">{concept.name}</span>
                             <span className="concept-card-description">{concept.description}</span>
