@@ -17,6 +17,27 @@ export type Choice = {
 }
 
 export type PracticeProgress = {
-    currentQuestion: string
-    maximumQuestion: string
+    currentQuestion: number
+    maximumQuestion: number
 }
+
+export type PracticeSessionResponse = {
+    id: string
+    status: "active" | "ended"
+}
+
+export type GetQuestionResponse =
+    | {
+        status: "active";
+        question: Question;
+        progress: PracticeProgress;
+    }
+    | {
+        status: "ended";
+        question: null;
+        progress: PracticeProgress;
+        endReason:
+            | "expired"
+            | "user_ended"
+            | "maximum_questions_reached";
+};

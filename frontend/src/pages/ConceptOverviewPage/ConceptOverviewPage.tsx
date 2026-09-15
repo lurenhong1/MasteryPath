@@ -1,9 +1,22 @@
 import {useNavigate, useParams} from "react-router";
+import {createPracticeSession} from "../../api/overviewApi.ts";
 
 function ConceptOverviewPage() {
-    const {conceptID} = useParams();
+    const {conceptID} = useParams<{conceptID: string}>();
 
     const navigate = useNavigate();
+
+    async function handleStartPractice() {
+        if (!conceptID) {
+            return;
+        }
+        try {
+            const result = await createPracticeSession(conceptID);
+            navigate(`/practice/${result.id}`);
+        } catch(error) {
+            console.error("Failed to start practice session: ", error)
+        }
+    }
 
     return (
         <>
@@ -14,7 +27,7 @@ function ConceptOverviewPage() {
                 {/* A simple dashboard display that navigate to dashboard page on click */}
                 {/* A discussion board or a todo list */}
                 <button
-                    onClick={() => navigate(`/concept/${conceptID}/practice`)}
+                    onClick={handleStartPractice}
                 >
                     Start Practice
                 </button>
