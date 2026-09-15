@@ -1,6 +1,10 @@
-import type {GetQuestionResponse} from "../types.ts";
+import type {
+    ActiveQuestionState,
+    SubmitAnswerRequest,
+    SubmitAnswerResponse
+} from "../types.ts";
 
-export async function getPracticeQuestionState(sessionID: string): Promise<GetQuestionResponse> {
+export async function getPracticeQuestionState(sessionID: string): Promise<ActiveQuestionState> {
     const response = await fetch(
         `/api/practice-sessions/${sessionID}`,
         {
@@ -15,5 +19,25 @@ export async function getPracticeQuestionState(sessionID: string): Promise<GetQu
         throw new Error("Failed to get question.");
     }
 
-    return await response.json() as Promise<GetQuestionResponse>
+    return await response.json() as Promise<ActiveQuestionState>
+}
+
+export async function submitQuestion(sessionID: string, request: SubmitAnswerRequest) {
+    const response = await fetch(
+        `/api/practice-sessions/${sessionID}/submissions`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify(request)
+        }
+    )
+
+    if(!response.ok) {
+        throw new Error("Failed to submit the question answer");
+    }
+
+    return await response.json() as Promise<SubmitAnswerResponse>
 }

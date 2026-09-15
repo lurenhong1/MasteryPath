@@ -4,11 +4,15 @@ import type {
     Question,
     PracticeProgress,
     Choice,
-    GetQuestionResponse
+    SubmitAnswerRequest,
+    QuestionAnswer
 } from "../../types.ts";
 import {useEffect, useState} from "react";
 import {useNavigate} from "react-router";
-import {getPracticeQuestionState} from "../../api/practiceApi.ts";
+import {
+    getPracticeQuestionState,
+    submitQuestion
+} from "../../api/practiceApi.ts";
 
 // POST /api/concepts/{conceptId}/practice-sessions
 //     → creates the session
@@ -28,36 +32,24 @@ function PracticePage() {
     const {sessionID} = useParams<{sessionID: string}>();
     const navigate = useNavigate();
 
-    const [question, setQuestion] = useState<Question>(
-        {
-            id: "1",
-            body: "What is the result of 1 + 1?",
-            questionType: "numeric",
-            selections: [
-                {
-                    id: "1",
-                    body: '2'
-                },
-                {
-                    id: "2",
-                    body: '4'
-                }
-            ]
-        }
-    );
-    const [progress, setProgress] = useState<PracticeProgress>(
-        {
-            currentQuestion: 1,
-            maximumQuestion: 20
-        }
-    )
+    const [question, setQuestion] = useState<Question>({});
+    const [progress, setProgress] = useState<PracticeProgress>({});
+
+    const [correctness, setCorrectness] = useState<boolean>(true);
+    const [feedback, setFeedback] = useState<string>("");
+
+    const [showFeedback, setShowFeedback] = useState<boolean>(false);
+    const [showCompletion, setShowCompletion] = useState<boolean>(false);
+
     const [numericAnswer, setNumericAnswer] = useState<number | undefined>(undefined);
     const [choiceAnswer, setChoiceAnswer] = useState<string[]>([]);
 
+    //update the selected choice
     function setSingleChoice(choice: Choice) {
         setChoiceAnswer([choice.id]);
     }
 
+    // Update the selected multiple choice
     function setMultipleChoice(choice: Choice) {
         setChoiceAnswer(current => current.includes(choice.id)
             ? current.filter(item => item !== choice.id)
@@ -65,21 +57,80 @@ function PracticePage() {
         )
     }
 
-    function handleLoadQuestion(result: GetQuestionResponse) {
-        if (result.status === "ended") {
-            navigate("/practice/session-ended", {
-                replace: true,
-                state: {
-                    progress: result.progress,
-                    reason: result.endReason
+    // Build the answer required by backend
+    function buildAnswer(): QuestionAnswer | null {
+        switch (question.questionType) {
+            case "numeric":
+                if (numericAnswer === undefined) {
+                    return null;
                 }
-            });
-            return;
+                return {
+                    type: "numeric",
+                    value: numericAnswer
+                };
+            case "single-choice":
+                const selectedChoiceId = choiceAnswer[0];
+                if (!selectedChoiceId) {
+                    return null;
+                }
+                return {
+                    type: "single-choice",
+                    selectedChoiceId: selectedChoiceId
+                }
+            case "multiple-choice":
+                if (choiceAnswer.length === 0) {
+                    return null;
+                }
+                return {
+                    type: "multiple-choice",
+                    selectedChoiceIds: choiceAnswer
+                }
         }
-        setQuestion(result.question);
-        setProgress(result.progress);
     }
 
+    // Load the current question.
+    function handleQuestionLoad(question: Question, progress: PracticeProgress) {
+        setQuestion(question);
+        setProgress(progress);
+    }
+
+    // Load the feedback of previous question
+    function handleFeedbackLoad(correctness: boolean, feedback: string) {
+        setCorrectness(correctness);
+        setFeedback(feedback);
+    }
+
+    // Submit the question and update the question if not completed.
+    async function handleQuestionSubmit() {
+        if (!sessionID) {
+            return;
+        }
+        const answer = buildAnswer();
+
+        if (!answer) {
+            console.error("An answer must be entered or selected");
+            return;
+            //     TODO: Implement empty answer behavior
+        }
+        const request: SubmitAnswerRequest = {
+            questionId: question.id,
+            answer: answer
+        }
+        const result = await submitQuestion(sessionID, request)
+        setNumericAnswer(undefined);
+        setChoiceAnswer([]);
+        handleFeedbackLoad(result.correct, result.feedback);
+        setShowFeedback(true);
+        const status = result.status;
+        if (status === "active") {
+            handleQuestionLoad(result.question, result.progress);
+        } else if (status === "ended") {
+            setShowCompletion(true);
+            setProgress(result.progress);
+        }
+    }
+
+    // Load the current question on entering the page.
     useEffect(() => {
         if (!sessionID) {
             return;
@@ -88,9 +139,9 @@ function PracticePage() {
         async function loadQuestion(id: string) {
             try {
                 const result = await getPracticeQuestionState(id);
-                handleLoadQuestion(result);
+                handleQuestionLoad(result.question, result.progress);
             } catch(error) {
-                console.log("Failed to get question for session: ", error);
+                console.error("Failed to get question for session: ", error);
             }
         }
 
@@ -104,7 +155,7 @@ function PracticePage() {
             </div>
             <main>
                 <div className="question-section">
-                    <h2 className="question-body">Question {progress.currentQuestion}</h2>
+                    <h2 className="question-body">Question {progress.currentQuestion}/{progress.maximumQuestion}</h2>
                     <h3>{question.body}</h3>
                     {question.questionType === "numeric"
                         ? <div>
@@ -142,6 +193,7 @@ function PracticePage() {
                             )}
                         </div>
                     }
+                    <button className="btn" onClick={handleQuestionSubmit}>Submit</button>
                 </div>
             </main>
         </>

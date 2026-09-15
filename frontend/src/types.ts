@@ -26,18 +26,56 @@ export type PracticeSessionResponse = {
     status: "active" | "ended"
 }
 
-export type GetQuestionResponse =
+export type SessionStatus = "active" | "ended";
+
+export type SessionEndReason =
+    | "expired"
+    | "user_ended"
+    | "maximum_questions_reached";
+
+export type AnswerEvaluation = {
+    correct: boolean;
+    feedback: string;
+};
+
+export type ActiveQuestionState = {
+    status: "active";
+    question: Question;
+    progress: PracticeProgress;
+};
+
+export type CompletedPracticeState = {
+    status: "ended";
+    progress: PracticeProgress;
+    endReason: "maximum_questions_reached";
+};
+
+export type QuestionAnswer =
     | {
-        status: "active";
-        question: Question;
-        progress: PracticeProgress;
+        type: "numeric";
+        value: number;
     }
-    | {
-        status: "ended";
-        question: null;
-        progress: PracticeProgress;
-        endReason:
-            | "expired"
-            | "user_ended"
-            | "maximum_questions_reached";
+        | {
+        type: "single-choice";
+        selectedChoiceId: string;
+    }
+        | {
+        type: "multiple-choice";
+        selectedChoiceIds: string[];
+    };
+
+export type SubmitAnswerRequest = {
+    questionId: string;
+    answer: QuestionAnswer;
+};
+
+export type SubmitAnswerResponse =
+    | (ActiveQuestionState & AnswerEvaluation)
+    | (CompletedPracticeState & AnswerEvaluation);
+
+export type SessionAlreadyEndedErrorResponse = {
+    code: "SESSION_ENDED";
+    status: "ended";
+    message: string;
+    endReason: SessionEndReason;
 };
