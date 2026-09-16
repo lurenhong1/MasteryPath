@@ -13,6 +13,7 @@ import {
     getPracticeQuestionState,
     submitQuestion
 } from "../../api/practiceApi.ts";
+import Modal from "../../components/Modal/Modal.tsx";
 
 // POST /api/concepts/{conceptId}/practice-sessions
 //     → creates the session
@@ -32,16 +33,17 @@ function PracticePage() {
     const {sessionID} = useParams<{sessionID: string}>();
     const navigate = useNavigate();
 
-    const [question, setQuestion] = useState<Question>({});
-    const [progress, setProgress] = useState<PracticeProgress>({});
+    const [question, setQuestion] = useState<Question | null>(null);
+    const [progress, setProgress] = useState<PracticeProgress | null>(null);
 
     const [correctness, setCorrectness] = useState<boolean>(true);
     const [feedback, setFeedback] = useState<string>("");
 
     const [showFeedback, setShowFeedback] = useState<boolean>(false);
     const [showCompletion, setShowCompletion] = useState<boolean>(false);
+    const [submitting, setSubmitting] = useState<boolean>(false);
 
-    const [numericAnswer, setNumericAnswer] = useState<number | undefined>(undefined);
+    const [numericAnswer, setNumericAnswer] = useState<string>("");
     const [choiceAnswer, setChoiceAnswer] = useState<string[]>([]);
 
     //update the selected choice
@@ -59,14 +61,17 @@ function PracticePage() {
 
     // Build the answer required by backend
     function buildAnswer(): QuestionAnswer | null {
+        if (!question) {
+            return null;
+        }
         switch (question.questionType) {
             case "numeric":
-                if (numericAnswer === undefined) {
+                if (numericAnswer === "") {
                     return null;
                 }
                 return {
                     type: "numeric",
-                    value: numericAnswer
+                    value: Number(numericAnswer)
                 };
             case "single-choice":
                 const selectedChoiceId = choiceAnswer[0];
@@ -102,7 +107,7 @@ function PracticePage() {
 
     // Submit the question and update the question if not completed.
     async function handleQuestionSubmit() {
-        if (!sessionID) {
+        if (!sessionID || !question) {
             return;
         }
         const answer = buildAnswer();
@@ -112,21 +117,28 @@ function PracticePage() {
             return;
             //     TODO: Implement empty answer behavior
         }
-        const request: SubmitAnswerRequest = {
-            questionId: question.id,
-            answer: answer
-        }
-        const result = await submitQuestion(sessionID, request)
-        setNumericAnswer(undefined);
-        setChoiceAnswer([]);
-        handleFeedbackLoad(result.correct, result.feedback);
-        setShowFeedback(true);
-        const status = result.status;
-        if (status === "active") {
-            handleQuestionLoad(result.question, result.progress);
-        } else if (status === "ended") {
-            setShowCompletion(true);
-            setProgress(result.progress);
+        try {
+            setSubmitting(true);
+            const request: SubmitAnswerRequest = {
+                questionId: question.id,
+                answer: answer
+            }
+            const result = await submitQuestion(sessionID, request)
+            setNumericAnswer("");
+            setChoiceAnswer([]);
+            handleFeedbackLoad(result.correct, result.feedback);
+            setShowFeedback(true);
+            const status = result.status;
+            if (status === "active") {
+                handleQuestionLoad(result.question, result.progress);
+            } else if (status === "ended") {
+                setShowCompletion(true);
+                setProgress(result.progress);
+            }
+        } catch (error) {
+            console.error("Failed to submit the answer: ", error);
+        } finally {
+            setSubmitting(false);
         }
     }
 
@@ -148,53 +160,89 @@ function PracticePage() {
         void loadQuestion(sessionID);
     }, [sessionID]);
 
+    if (question === null || progress === null) {
+        return <p>Loading Questions...</p>;
+    }
+
     return (
         <>
             <div className="header">
                 <h1 className="header-text">Practice</h1>
             </div>
             <main>
-                <div className="question-section">
-                    <h2 className="question-body">Question {progress.currentQuestion}/{progress.maximumQuestion}</h2>
-                    <h3>{question.body}</h3>
-                    {question.questionType === "numeric"
-                        ? <div>
-                            <input
-                                type="number"
-                                value={numericAnswer}
-                                onChange={(event) => {
-                                    const value = event.target.value;
-                                    setNumericAnswer(value === "" ? undefined : Number(value))
-                                }}
-                            />
-                        </div>
-                        : <div>
-                            {question.selections && question.selections.map(choice => (
-                                <div key={choice.id}>
-                                    <input
-                                        type={question.questionType === "single-choice"
-                                            ? "radio"
-                                            : "checkbox"
-                                        }
-                                        name={`question-${question.id}`}
-                                        value={choice.id}
-                                        checked={choiceAnswer.includes(choice.id)}
-                                        onChange={() => {
-                                            if (question.questionType === "single-choice") {
-                                                setSingleChoice(choice);
-                                            } else {
-                                                setMultipleChoice(choice);
-                                            }
-                                        }}
-                                    />
-                                    <span>{choice.body}</span>
-                                </div>
-                                )
-                            )}
-                        </div>
+                {showCompletion
+                    ? <div className="complete-section">
+                        <h2>Congratulation! You have completed this practice session! Click the button below to return to the concept selection page.</h2>
+                        <button
+                            className="btn"
+                            onClick={() => navigate("/concept-selection")}
+                        >
+                            Return
+                        </button>
+                    </div>
+                    : <div className="question-section">
+                        <h2 className="question-body">Question {progress.currentQuestion}/{progress.maximumQuestion}</h2>
+                        <h3>{question.body}</h3>
+                        {question.questionType === "numeric"
+                            ? <div>
+                                <input
+                                    type="number"
+                                    value={numericAnswer}
+                                    onChange={(event) => {
+                                        setNumericAnswer(event.target.value)
+                                    }}
+                                />
+                            </div>
+                            : <div>
+                                {question.selections && question.selections.map(choice => (
+                                        <div key={choice.id}>
+                                            <input
+                                                type={question.questionType === "single-choice"
+                                                    ? "radio"
+                                                    : "checkbox"
+                                                }
+                                                name={`question-${question.id}`}
+                                                value={choice.id}
+                                                checked={choiceAnswer.includes(choice.id)}
+                                                onChange={() => {
+                                                    if (question.questionType === "single-choice") {
+                                                        setSingleChoice(choice);
+                                                    } else {
+                                                        setMultipleChoice(choice);
+                                                    }
+                                                }}
+                                            />
+                                            <span>{choice.body}</span>
+                                        </div>
+                                    )
+                                )}
+                            </div>
+                        }
+                        <button
+                            className="btn"
+                            onClick={handleQuestionSubmit}
+                            disabled={submitting}
+                        >
+                            Submit
+                        </button>
+                    </div>
+
+                }
+                <Modal
+                    open={showFeedback}
+                    header={
+                        <>
+                            {correctness
+                                ? <h2>Correct</h2>
+                                : <h2>Incorrect</h2>
+                            }
+                        </>
                     }
-                    <button className="btn" onClick={handleQuestionSubmit}>Submit</button>
-                </div>
+                    onClose={() => setShowFeedback(false)}
+                >
+                    <span>{feedback}</span>
+                </Modal>
+
             </main>
         </>
     )
