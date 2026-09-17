@@ -14,6 +14,7 @@ import {
     submitQuestion
 } from "../../api/practiceApi.ts";
 import Modal from "../../components/Modal/Modal.tsx";
+import {SessionAlreadyEndedError} from "../../api/practiceApiErrors.ts";
 
 // POST /api/concepts/{conceptId}/practice-sessions
 //     → creates the session
@@ -136,10 +137,21 @@ function PracticePage() {
                 setProgress(result.progress);
             }
         } catch (error) {
-            console.error("Failed to submit the answer: ", error);
+            handlePracticeError(error);
         } finally {
             setSubmitting(false);
         }
+    }
+
+    function handlePracticeError(error: unknown) {
+        if (error instanceof SessionAlreadyEndedError) {
+            navigate(`practice/${sessionID}/ended`, {
+                replace: true,
+                state: error.details
+            });
+            return;
+        }
+        console.error("Practice request failed: ", error);
     }
 
     // Load the current question on entering the page.
@@ -153,7 +165,7 @@ function PracticePage() {
                 const result = await getPracticeQuestionState(id);
                 handleQuestionLoad(result.question, result.progress);
             } catch(error) {
-                console.error("Failed to get question for session: ", error);
+                handlePracticeError(error)
             }
         }
 

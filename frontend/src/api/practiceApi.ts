@@ -3,6 +3,7 @@ import type {
     SubmitAnswerRequest,
     SubmitAnswerResponse
 } from "../types.ts";
+import {throwPracticeApiError} from "./practiceApiErrors.ts";
 
 export async function getPracticeQuestionState(sessionID: string): Promise<ActiveQuestionState> {
     const response = await fetch(
@@ -36,7 +37,7 @@ export async function submitQuestion(sessionID: string, request: SubmitAnswerReq
     )
 
     if(!response.ok) {
-        throw new Error("Failed to submit the question answer");
+        await throwPracticeApiError(response);
     }
 
     return await response.json() as Promise<SubmitAnswerResponse>

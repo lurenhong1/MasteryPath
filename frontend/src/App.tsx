@@ -3,6 +3,7 @@ import ConceptSelectionPage from './pages/ConceptSelectionPage/ConceptSelectionP
 import ConceptOverviewPage from "./pages/ConceptOverviewPage/ConceptOverviewPage.tsx";
 import PracticePage from "./pages/PracticePage/PracticePage.tsx";
 import './App.css'
+import SessionEndedPage from "./pages/SessionEndedPage/SessionEndedPage.tsx";
 
 function App() {
     return (
@@ -35,6 +36,10 @@ function App() {
             <Route
                 path="/practice/:sessionID"
                 element={<PracticePage />}
+            />
+            <Route
+                path="/practice/:sessionID/ended"
+                element={<SessionEndedPage />}
             />
             {/* TODO: Implement a session-not-found page for invalid or missing session IDs. */}
             {/* TODO: Implement a session-ended page for expired, user-ended, and completed sessions. */}
