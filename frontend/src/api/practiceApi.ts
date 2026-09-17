@@ -17,7 +17,7 @@ export async function getPracticeQuestionState(sessionID: string): Promise<Activ
     )
 
     if (!response.ok) {
-        throw new Error("Failed to get question.");
+        await throwPracticeApiError(response);
     }
 
     return await response.json() as Promise<ActiveQuestionState>

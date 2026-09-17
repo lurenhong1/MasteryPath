@@ -145,7 +145,8 @@ function PracticePage() {
 
     function handlePracticeError(error: unknown) {
         if (error instanceof SessionAlreadyEndedError) {
-            navigate(`practice/${sessionID}/ended`, {
+            console.log("Navigating")
+            navigate(`/practice/${sessionID}/ended`, {
                 replace: true,
                 state: error.details
             });

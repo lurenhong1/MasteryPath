@@ -8,7 +8,7 @@ export class SessionAlreadyEndedError extends Error {
 
     constructor(details: SessionAlreadyEndedErrorResponse) {
         super(details.message);
-        this.name = "SessionALreadyEndedError";
+        this.name = "SessionAlreadyEndedError";
         this.details = details
     }
 }
