@@ -1,10 +1,10 @@
 import {http, HttpResponse} from "msw";
 import type {PracticeSessionResponse} from "../types";
 
-const activeQuestion = {
+const activeQuestionNumeric = {
     status: "active",
     question: {
-        id: "question-1",
+        id: "question-numeric",
         body: "What is 2 + 2?",
         questionType: "numeric",
         selections: null
@@ -15,14 +15,59 @@ const activeQuestion = {
     }
 };
 
+const activeQuestionSingleSelection = {
+    status: "active",
+    question: {
+        id: "question-selection",
+        body: "What is 2 + 2?",
+        questionType: "single-choice",
+        selections: [
+            {id: "1", body: "2 + 2 = 1"},
+            {id: "2", body: "2 + 2 = 2"},
+            {id: "3", body: "2 + 2 = 3"},
+            {id: "4", body: "2 + 2 = 4"},
+        ]
+    },
+    progress: {
+        currentQuestion: 1,
+        maximumQuestion: 2
+    }
+};
+
+const activeQuestionMultipleSelection = {
+    status: "active",
+    question: {
+        id: "question-selection",
+        body: "What is 2 + 2?",
+        questionType: "multiple-choice",
+        selections: [
+            {id: "1", body: "2 + 2 = 1"},
+            {id: "2", body: "2 + 2 = 2"},
+            {id: "3", body: "2 + 2 = 3"},
+            {id: "4", body: "2 + 2 = 4"},
+        ]
+    },
+    progress: {
+        currentQuestion: 1,
+        maximumQuestion: 2
+    }
+};
+
+const sessionIDByConceptID: Record<string, string> = {
+    "1": "activeNumeric",
+    "2": "activeSelection1",
+    "3": "activeSelection2",
+    "4": "complete",
+    "5": "ended",
+    "6": "submit-ended"
+};
+
 export const handlers = [
     http.post(
         "/api/concepts/:conceptID/practice-sessions",
         ({params}) => {
-            const sessionID =
-                params.conceptID === "2"
-                    ? "ended"
-                    : "active";
+            const conceptID = String(params.conceptID);
+            const sessionID = sessionIDByConceptID[conceptID] ?? "activeNumeric";
 
             const response = {
                 id: sessionID,
@@ -49,8 +94,17 @@ export const handlers = [
                     {status: 410}
                 );
             }
+            if (params.sessionID === "activeNumeric") {
+                return HttpResponse.json(activeQuestionNumeric);
+            }
+            if (params.sessionID === "activeSelection1") {
+                return HttpResponse.json(activeQuestionSingleSelection);
+            }
+            if (params.sessionID === "activeSelection2") {
+                return HttpResponse.json(activeQuestionMultipleSelection);
+            }
 
-            return HttpResponse.json(activeQuestion);
+            return HttpResponse.json(activeQuestionNumeric);
         }
     ),
 

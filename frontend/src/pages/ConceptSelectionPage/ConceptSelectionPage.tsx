@@ -17,6 +17,26 @@ function ConceptSelectionPage () {
                 name: 'Geometry',
                 description: 'Learn shapes and measurements',
             },
+            {
+                id: '3',
+                name: 'Physics',
+                description: 'Modern physics',
+            },
+            {
+                id: '4',
+                name: 'Chemistry',
+                description: 'Art Is an Explosion',
+            },
+            {
+                id: '5',
+                name: 'Concept 5',
+                description: 'Ended session',
+            },
+            {
+                id: '6',
+                name: 'Concept 6',
+                description: 'Ended session due to completion',
+            },
         ]
     )
 

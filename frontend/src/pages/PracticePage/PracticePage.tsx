@@ -1,5 +1,4 @@
 import {useParams} from "react-router";
-
 import type {
     Question,
     PracticeProgress,
@@ -15,6 +14,7 @@ import {
 } from "../../api/practiceApi.ts";
 import Modal from "../../components/Modal/Modal.tsx";
 import {SessionAlreadyEndedError} from "../../api/practiceApiErrors.ts";
+import "./PracticePage.css"
 
 // POST /api/concepts/{conceptId}/practice-sessions
 //     → creates the session
@@ -182,7 +182,7 @@ function PracticePage() {
             <div className="header">
                 <h1 className="header-text">Practice</h1>
             </div>
-            <main>
+            <main className="practice-main">
                 {showCompletion
                     ? <div className="complete-section">
                         <h2>Congratulation! You have completed this practice session! Click the button below to return to the concept selection page.</h2>
@@ -194,21 +194,26 @@ function PracticePage() {
                         </button>
                     </div>
                     : <div className="question-section">
-                        <h2 className="question-body">Question {progress.currentQuestion}/{progress.maximumQuestion}</h2>
-                        <h3>{question.body}</h3>
+                        <h2 className="question-progress">Question {progress.currentQuestion}/{progress.maximumQuestion}</h2>
+                        <h3 className="question-body">{question.body}</h3>
                         {question.questionType === "numeric"
-                            ? <div>
-                                <input
-                                    type="number"
-                                    value={numericAnswer}
-                                    onChange={(event) => {
-                                        setNumericAnswer(event.target.value)
-                                    }}
-                                />
-                            </div>
-                            : <div>
+                            ? <input
+                                className="numeric-input-box"
+                                type="number"
+                                value={numericAnswer}
+                                onChange={(event) => {
+                                    setNumericAnswer(event.target.value)
+                                }}
+                            />
+                            : <div className="choice-selection-box">
                                 {question.selections && question.selections.map(choice => (
-                                        <div key={choice.id}>
+                                        <div
+                                            style={{
+                                                display: "flex",
+                                                gap: "10px"
+                                            }}
+                                            key={choice.id}
+                                        >
                                             <input
                                                 type={question.questionType === "single-choice"
                                                     ? "radio"
@@ -232,7 +237,7 @@ function PracticePage() {
                             </div>
                         }
                         <button
-                            className="btn"
+                            className="btn submit-button"
                             onClick={handleQuestionSubmit}
                             disabled={submitting}
                         >
