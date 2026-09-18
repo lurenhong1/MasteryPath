@@ -149,7 +149,16 @@ export const handlers = [
                     maximumQuestion: 2
                 },
                 correct: true,
-                feedback: "Correct."
+                feedback: "You correctly determined that 2 + 2 = 4, and " +
+                    "showing your progress by identifying the two groups, " +
+                    "combining them, and counting the total demonstrates " +
+                    "that you understand how addition represents putting " +
+                    "quantities together rather than simply memorizing the " +
+                    "answer. \nYour reasoning is clear and accurate, and " +
+                    "as you continue practicing, keep showing each step in " +
+                    "this way because it makes your thinking easy to " +
+                    "follow, helps you catch mistakes, and builds a strong " +
+                    "foundation for solving more challenging addition problems."
             });
         }
     )

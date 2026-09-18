@@ -1,4 +1,5 @@
 import type {ReactNode} from "react";
+import "./Modal.css"
 
 type ModalProps = {
     open: boolean;
@@ -12,14 +13,21 @@ function Modal({open, header, children, onClose}: ModalProps) {
         return null;
     }
     return (
-        <div className="modal-backdrop">
+        <div
+            className="modal-backdrop"
+            onClick={(event) => {
+                if (event.target === event.currentTarget) {
+                    onClose();
+                }
+            }}
+        >
             <section
                 className="modal"
                 role="dialog"
                 aria-modal="true"
                 aria-label="Answer feedback"
             >
-                <div>
+                <div className="modal-header">
                     {header}
                     <button
                         type="button"

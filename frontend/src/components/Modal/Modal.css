@@ -1,0 +1,36 @@
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgb(0 0 0 / 50%);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.modal {
+    position: relative;
+    width: 500px;
+    max-height: calc(100vh - 2rem);
+    box-sizing: border-box;
+    gap: 10px;
+    padding: 20px;
+    border-radius: 10px;
+    display: grid;
+    background: white;
+    box-shadow: 0 1.25rem 3rem rgb(0 0 0 / 25%);
+}
+
+.modal-header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+}
+
+.close-btn {
+    width: 30px;
+    aspect-ratio: 1;
+    border-radius: 10px;
+}
