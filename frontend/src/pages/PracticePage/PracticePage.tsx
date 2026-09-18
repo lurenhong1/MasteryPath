@@ -251,14 +251,16 @@ function PracticePage() {
                     header={
                         <>
                             {correctness
-                                ? <h2>Correct</h2>
-                                : <h2>Incorrect</h2>
+                                ? <h2>Correct!</h2>
+                                : <h2>Incorrect!</h2>
                             }
                         </>
                     }
                     onClose={() => setShowFeedback(false)}
                 >
-                    <span>{feedback}</span>
+                    <span style={{ whiteSpace: "pre-line" }}>
+                        {feedback}
+                    </span>
                 </Modal>
 
             </main>
