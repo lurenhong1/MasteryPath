@@ -117,7 +117,7 @@ export const handlers = [
                         code: "SESSION_ENDED",
                         status: "ended",
                         message: "This session has already ended.",
-                        endReason: "user_ended"
+                        endReason: "maximum_questions_reached"
                     },
                     {status: 410}
                 );
