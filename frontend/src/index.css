@@ -25,6 +25,28 @@ body {
     background-color: var(--main-background);
 }
 
-h1 {
+h1,
+h2,
+h3 {
     margin: 0;
+}
+
+.btn {
+    background-color: #60a5fa;
+    color: #0f172a;
+    border: none;
+    width: max-content;
+    height: max-content;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.btn:hover {
+    background-color: #3b82f6;
+}
+
+.btn:disabled {
+    background-color: #cbd5e1;
+    color: #64748b;
+    cursor: not-allowed;
 }

@@ -1,0 +1,62 @@
+.practice-main {
+    display: grid;
+    place-items: center;
+    min-height: calc(100dvh - 80px);
+    background-color: var(--main-background);
+}
+
+.complete-section,
+.question-section {
+    width: 600px;
+}
+
+.complete-section {
+    height: 600px;
+    display: grid;
+    grid-template-rows: 1fr max-content;
+    justify-items: center;
+}
+
+.question-section {
+    height: max-content;
+    display: flex;
+    flex-direction: column;
+    background-color: #dbeafe;
+    border-radius: 10px;
+    padding-bottom: 10px;
+    gap: 10px;
+    overflow: hidden;
+}
+
+.question-progress {
+    background-color: #93c5fd;
+    padding: 10px;
+    border-top-radius: 10px;
+}
+
+.question-body {
+    padding-inline: 10px;
+}
+
+.numeric-input-box {
+    align-self: center;
+    padding: 10px;
+    border-radius: 10px;
+
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+.numeric-input-box::-webkit-inner-spin-button,
+.numeric-input-box::-webkit-outer-spin-button {
+    margin: 0;
+    -webkit-appearance: none;
+}
+
+.choice-selection-box {
+    padding-inline: 10px;
+}
+
+.submit-button {
+    align-self: center;
+}

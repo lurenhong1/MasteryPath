@@ -1,0 +1,9 @@
+.session-ended-main {
+    display: grid;
+    box-sizing: border-box;
+    min-height: calc(100dvh - 80px);
+    padding: 10px 50px;
+    background-color: var(--main-background);
+    gap: 10px;
+    grid-template-rows: auto 1fr;
+}
