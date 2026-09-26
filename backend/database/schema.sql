@@ -13,7 +13,8 @@ CREATE TABLE users (
 
 CREATE TABLE concepts (
     id UUID PRIMARY KEY DEFAULT uuidv7(),
-    name TEXT NOT NULL UNIQUE
+    name TEXT NOT NULL UNIQUE,
+    description TEXT
 );
 
 CREATE TABLE user_concept_mastery (
